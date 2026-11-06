@@ -37,7 +37,6 @@ else
   echo "Assinado com: $IDENTITY"
 fi
 
-# Faz o LaunchServices perceber o bundle novo.
 touch "$APP"
 
 echo

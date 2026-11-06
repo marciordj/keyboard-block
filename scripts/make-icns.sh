@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Converte um PNG quadrado em .icns com todas as resoluções que o macOS usa.
-# Uso: make-icns.sh <entrada.png> <saida.icns>
 set -euo pipefail
 
 SRC="$1"

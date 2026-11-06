@@ -17,8 +17,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let blocker = KeyboardBlocker()
     private var statusItem: NSStatusItem!
 
-    /// Sempre limitado: nunca existe "bloquear para sempre".
-    /// Se o app morrer, o teclado volta; se não morrer, o timer devolve.
     private let durations: [TimeInterval] = [60, 120, 300, 600]
     private var selectedDuration: TimeInterval = 120
 
@@ -27,8 +25,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var rightHoldTimer: Timer?
 
     private var isBlocked: Bool { blocker.isRunning }
-
-    // MARK: - Ciclo de vida
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let stored = UserDefaults.standard.double(forKey: DefaultsKey.duration)
@@ -48,8 +44,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         blocker.stop()
     }
-
-    // MARK: - Ações
 
     @objc private func lockNow() {
         guard ensureAccessibility() else { return }
@@ -81,7 +75,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         deadline = nil
         updateAppearance()
 
-        // Evita que o gesto de escape dispare um clique fantasma no app em foco.
         if case .escapeGesture = reason {
             NSSound.beep()
         }
@@ -132,8 +125,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         refreshMenu()
     }
 
-    // MARK: - Permissão de Acessibilidade
-
     private func ensureAccessibility() -> Bool {
         if AXIsProcessTrusted() { return true }
 
@@ -160,12 +151,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return false
     }
 
-    // MARK: - Contagem regressiva
-
     private func startCountdown() {
         countdownTimer?.invalidate()
 
-        // `.common` mantém o timer rodando com o menu aberto (modo eventTracking).
         let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
             guard let self, let deadline = self.deadline else { return }
             if deadline.timeIntervalSinceNow <= 0 {
@@ -184,11 +172,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return String(format: "%d:%02d", remaining / 60, remaining % 60)
     }
 
-    // MARK: - Saída de emergência
-
-    /// Segurar o botão direito por 1,5s libera o teclado.
-    /// Funciona mesmo com a barra de menus escondida (app em tela cheia),
-    /// e não depende do teclado — que é justamente o que está bloqueado.
     private func installEscapeGesture() {
         NSEvent.addGlobalMonitorForEvents(matching: [.rightMouseDown]) { [weak self] _ in
             guard let self, self.isBlocked else { return }
@@ -203,8 +186,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.rightHoldTimer = nil
         }
     }
-
-    // MARK: - Aparência
 
     private func updateAppearance() {
         guard let button = statusItem.button else { return }
@@ -229,8 +210,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         button.imagePosition = .imageLeading
         button.title = isBlocked ? " " + countdownText() : ""
     }
-
-    // MARK: - Menu
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         refreshMenu()

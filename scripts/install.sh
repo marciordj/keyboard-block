@@ -10,7 +10,6 @@ rm -rf "$DEST"
 cp -R "build/KeyboardBlock.app" "$DEST"
 touch "$DEST"
 
-# Atualiza o cache do LaunchServices pro Finder/Spotlight pegarem o ícone novo.
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$DEST" 2>/dev/null || true
 
 echo
