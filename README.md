@@ -1,116 +1,121 @@
 # KeyboardBlock
 
-App de barra de menu para **bloquear o teclado do MacBook** enquanto você limpa
-as teclas fisicamente.
+**English** · [Português (BR)](README.pt-BR.md)
 
-Sem desligar a máquina: o bloqueio acontece com o Mac ligado, então apertar
-tecla não liga nada. O teclado volta com um clique do mouse.
+A menu bar app to **block the MacBook keyboard** while you wipe the keys down.
+
+No shutdown required: the block happens with the Mac awake, so pressing a key
+powers nothing on. The keyboard comes back with a mouse click.
 
 ```
-⌨️  ícone cinza   → teclado normal
-⌨️  1:47 (vermelho) → teclado bloqueado, faltam 1min47s
+⌨️  gray icon       → keyboard live
+⌨️  1:47 (red)      → keyboard blocked, 1min47s left
 ```
 
-## Como funciona
+## How it works
 
-Cria um [`CGEventTap`](https://developer.apple.com/documentation/coregraphics) no
-nível da sessão e descarta os eventos de teclado (`keyDown`, `keyUp`,
-`flagsChanged`, teclas de mídia). Não usa `sudo`, não altera nada em disco e não
-persiste estado no sistema.
+Creates a [`CGEventTap`](https://developer.apple.com/documentation/coregraphics)
+at the session level and discards keyboard events (`keyDown`, `keyUp`,
+`flagsChanged`, media keys). No `sudo`, nothing written to disk, no state left
+behind in the system.
 
-**Falha segura por construção:** o tap vive dentro do processo. Se o app travar,
-for morto ou você clicar em "Sair", o teclado volta na hora. É a diferença
-principal em relação a remapear teclas com `hidutil`, que deixa o sistema num
-estado persistente e pode te trancar fora.
+**Fails safe by construction:** the tap lives inside the process. If the app
+hangs, gets killed, or you hit "Quit", the keyboard comes back immediately.
+That is the main difference from remapping keys with `hidutil`, which leaves the
+system in a persistent state and can lock you out.
 
-## Instalação
+## Install
 
-Requer macOS 13+ e Xcode Command Line Tools.
+Requires macOS 13+ and Xcode Command Line Tools.
 
 ```bash
 ./scripts/install.sh
 ```
 
-Depois:
+Then:
 
-1. Abra: `open -a KeyboardBlock`
-2. Clique no ícone da barra de menu → **Bloquear teclado**.
-3. O macOS vai pedir **Acessibilidade**. Ative o KeyboardBlock em
-   *Ajustes do Sistema › Privacidade e Segurança › Acessibilidade*.
-4. **Feche e reabra o app** (a permissão só vale no próximo lançamento).
+1. Open it: `open -a KeyboardBlock`
+2. Click the menu bar icon → **Bloquear teclado** (*Block keyboard*).
+3. macOS will ask for **Accessibility**. Enable KeyboardBlock under
+   *System Settings › Privacy & Security › Accessibility*.
+4. **Quit and reopen the app** (the permission only applies on the next launch).
 
-> Instale em `/Applications` **antes** de conceder a permissão. O macOS amarra a
-> permissão ao caminho/assinatura do app — se você conceder em `build/` e depois
-> mover, precisa conceder de novo.
+> Install to `/Applications` **before** granting the permission. macOS ties the
+> permission to the app's path/signature — grant it in `build/` and then move the
+> app, and you will have to grant it again.
 
-## Uso
+## Usage
 
-| Ação | Como |
+| Action | How |
 |---|---|
-| Bloquear | clique no ícone → **Bloquear teclado** |
-| Liberar | clique no ícone → **Liberar agora** |
-| Liberar sem olhar a barra | **segure o botão direito por 1,5s** |
-| Liberar sozinho | timer de 1/2/5/10 min (padrão: 2 min) |
+| Block | click the icon → **Bloquear teclado** |
+| Release | click the icon → **Liberar agora** (*Release now*) |
+| Release without looking at the bar | **hold the right mouse button for 1.5s** |
+| Release automatically | 1/2/5/10 min timer (default: 2 min) |
 
-O tempo é **sempre limitado** — não existe "bloquear para sempre". Três redes de
-segurança independentes: o timer, o gesto de botão direito e o fato de o tap
-morrer junto com o processo.
+The duration is **always bounded** — there is no "block forever". Three
+independent safety nets: the timer, the right-button gesture, and the tap dying
+along with the process.
 
-## Limitações (honestas)
+The menu itself is in Portuguese, hence the labels above.
 
-- **Não impede ligar o Mac.** Com a máquina desligada nenhum software roda — a
-  tecla liga o Mac e ponto. O fluxo correto é limpar com o Mac **ligado e o
-  teclado bloqueado**, em vez de desligado.
-- **Bloqueia todos os teclados**, não só o interno. Se você tem teclado externo e
-  precisa dele durante a limpeza, esse não é o app (exigiria `IOKit` seize com
-  root).
-- **Teclas de mídia/brilho** também são bloqueadas, mas o *display* ainda pode
-  acordar com uma tecla pressionada — o evento morre depois do handler de power.
-- **Precisa de Acessibilidade**, e a permissão está ligada à assinatura do
-  binário. Com assinatura ad-hoc, cada `./scripts/build-app.sh` pode exigir nova
-  concessão. Para evitar:
+## Honest limitations
+
+- **It cannot stop the Mac from powering on.** With the machine off, no software
+  runs — a keypress powers it on, period. The right flow is to clean with the Mac
+  **on and the keyboard blocked**, not powered off.
+- **Blocks every keyboard**, not just the built-in one. If you have an external
+  keyboard and need it while cleaning, this is not the app (that would require
+  `IOKit` seize with root).
+- **Media/brightness keys** are blocked too, but the *display* can still wake on a
+  keypress — the event dies after the power handler.
+- **Needs Accessibility**, and the permission is tied to the binary's signature.
+  With ad-hoc signing, every `./scripts/build-app.sh` may require re-granting.
+  To avoid that:
 
   ```bash
-  CODESIGN_IDENTITY="Apple Development: voce@exemplo.com (XXXXXXXXXX)" ./scripts/build-app.sh
+  CODESIGN_IDENTITY="Apple Development: you@example.com (XXXXXXXXXX)" ./scripts/build-app.sh
   ```
 
-  (ou crie um certificado autoassinado no Acesso às Chaves e use o nome dele)
-- **Fora da App Store.** Sandbox não combina com event tap de bloqueio.
-  Distribuir para terceiros exigiria notarização.
+  (or create a self-signed certificate in Keychain Access and use its name)
+- **Not on the App Store.** Sandboxing does not work with a blocking event tap.
+  Distributing to others would require notarization.
 
-## Ícone do app
+## App icon
 
-`Resources/AppIcon.png` (quadrado, 1024×1024, full-bleed) é convertido em
-`AppIcon.icns` no build, com as 10 resoluções, e referenciado por
-`CFBundleIconFile`. Também aceita um `.icns` pronto em `Resources/AppIcon.icns`.
+`Resources/AppIcon.png` (square, 1024×1024, full-bleed) is converted to
+`AppIcon.icns` at build time, with all 10 resolutions, and referenced by
+`CFBundleIconFile`. A ready-made `.icns` placed at `Resources/AppIcon.icns` works
+too.
 
-No macOS 26 o sistema aplica a máscara squircle e o fundo de vidro por cima —
-por isso a arte vai full-bleed, sem margem e sem cantos arredondados.
+On macOS 26 the system applies the squircle mask and the glass background on top
+— which is why the artwork goes full-bleed, with no margin and no rounded
+corners.
 
-O ícone da **barra de menu** é outro: um SF Symbol (`keyboard` / `keyboard.fill`)
-definido em `AppDelegate.updateAppearance()`.
+The **menu bar** icon is a different thing: an SF Symbol
+(`keyboard` / `keyboard.fill`) set in `AppDelegate.updateAppearance()`.
 
-## Estrutura
+## Layout
 
 ```
 Sources/KeyboardBlock/
-  main.swift            boot do NSApplication como app de barra (LSUIElement)
-  AppDelegate.swift     ícone, menu, timer, gesto de escape
-  KeyboardBlocker.swift CGEventTap: cria, descarta eventos, reativa se o
-                        sistema desativar por timeout
-Resources/Info.plist    bundle (LSUIElement=true, sem Dock icon)
-Resources/AppIcon.png   arte do ícone (1024x1024, full-bleed)
-scripts/build-app.sh    compila e monta o .app
-scripts/make-icns.sh    PNG -> .icns com as 10 resoluções
-scripts/install.sh      build + copia para /Applications
+  main.swift            boots NSApplication as a menu bar app (LSUIElement)
+  AppDelegate.swift     icon, menu, timer, escape gesture
+  KeyboardBlocker.swift CGEventTap: creates the tap, drops events, re-enables
+                        itself if the system disables it on timeout
+Resources/Info.plist    bundle (LSUIElement=true, no Dock icon)
+Resources/AppIcon.png   icon artwork (1024x1024, full-bleed)
+scripts/build-app.sh    compiles and assembles the .app
+scripts/make-icns.sh    PNG -> .icns with all 10 resolutions
+scripts/install.sh      build + copy to /Applications
 ```
 
-## Desenvolvimento
+## Development
 
 ```bash
-swift build            # compila
-./scripts/build-app.sh # gera build/KeyboardBlock.app
+swift build            # compile
+./scripts/build-app.sh # produce build/KeyboardBlock.app
 ```
 
-Testar o bloqueio de verdade exige conceder Acessibilidade — não dá para
-automatizar isso sem interação no diálogo do sistema.
+Testing the block for real requires granting Accessibility — that cannot be
+automated without interacting with the system dialog.
