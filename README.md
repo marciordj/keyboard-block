@@ -78,6 +78,18 @@ morrer junto com o processo.
 - **Fora da App Store.** Sandbox não combina com event tap de bloqueio.
   Distribuir para terceiros exigiria notarização.
 
+## Ícone do app
+
+`Resources/AppIcon.png` (quadrado, 1024×1024, full-bleed) é convertido em
+`AppIcon.icns` no build, com as 10 resoluções, e referenciado por
+`CFBundleIconFile`. Também aceita um `.icns` pronto em `Resources/AppIcon.icns`.
+
+No macOS 26 o sistema aplica a máscara squircle e o fundo de vidro por cima —
+por isso a arte vai full-bleed, sem margem e sem cantos arredondados.
+
+O ícone da **barra de menu** é outro: um SF Symbol (`keyboard` / `keyboard.fill`)
+definido em `AppDelegate.updateAppearance()`.
+
 ## Estrutura
 
 ```
@@ -87,7 +99,9 @@ Sources/KeyboardBlock/
   KeyboardBlocker.swift CGEventTap: cria, descarta eventos, reativa se o
                         sistema desativar por timeout
 Resources/Info.plist    bundle (LSUIElement=true, sem Dock icon)
+Resources/AppIcon.png   arte do ícone (1024x1024, full-bleed)
 scripts/build-app.sh    compila e monta o .app
+scripts/make-icns.sh    PNG -> .icns com as 10 resoluções
 scripts/install.sh      build + copia para /Applications
 ```
 

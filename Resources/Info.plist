@@ -8,6 +8,8 @@
 	<string>KeyboardBlock</string>
 	<key>CFBundleExecutable</key>
 	<string>KeyboardBlock</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.lmarciord.keyboardblock</string>
 	<key>CFBundleInfoDictionaryVersion</key>

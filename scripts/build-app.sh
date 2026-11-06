@@ -17,6 +17,15 @@ cp "$BIN" "$APP/Contents/MacOS/KeyboardBlock"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist" > /dev/null
 
+if [ -f Resources/AppIcon.png ]; then
+  ./scripts/make-icns.sh Resources/AppIcon.png "$APP/Contents/Resources/AppIcon.icns"
+elif [ -f Resources/AppIcon.icns ]; then
+  cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+  echo "icone: Resources/AppIcon.icns"
+else
+  echo "sem icone (Resources/AppIcon.png) — usando o icone generico do sistema"
+fi
+
 if [ "$IDENTITY" = "-" ]; then
   codesign --force --sign - "$APP"
   echo "Assinado ad-hoc."
